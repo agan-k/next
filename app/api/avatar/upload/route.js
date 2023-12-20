@@ -11,6 +11,7 @@ export async function POST(request) {
  
   return NextResponse.json(blob);
 }
+//*** vercel blob put() doesn't seem to support ts? */
 // export async function POST(request: Request): Promise<NextResponse> {
 //   const { searchParams } = new URL(request.url);
 //   const filename = searchParams.get('filename');
