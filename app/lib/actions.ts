@@ -6,17 +6,52 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
  
-const FormSchema = z.object({
+const InvoiceSchema = z.object({
   id: z.string(),
   customerId: z.string(),
   amount: z.coerce.number(),//because native input type "number" returns string
   status: z.enum(['pending', 'paid']),
   date: z.string(),
 });
+const CustomerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  image_url: z.string(),
+});
  
-const CreateInvoice = FormSchema.omit({ id: true, date: true });
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const CreateCustomer = CustomerSchema.omit({ id: true});
+const CreateInvoice = InvoiceSchema.omit({ id: true, date: true });
+const UpdateInvoice = InvoiceSchema.omit({ id: true, date: true });
  
+export async function createCustomer(formData: FormData) {
+  const {name, email, image_url} = CreateCustomer.parse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    image_url: formData.get('image_url'),
+  });
+
+  try {
+    await sql`
+      INSERT INTO customers (name, email, image_url)
+      VALUES (${name}, ${email}, ${image_url})
+    `;
+  } catch (err) {
+    return {message: 'Database error: faild to create invoice.'}
+  }
+
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
+}
+export async function deleteCustomer(id: string) {
+  try {
+    await sql`DELETE FROM customers WHERE id = ${id}`;
+  } catch (err) {
+    return {message: 'Database error: failed to delete invoice.'}
+  }
+ 
+  revalidatePath('/dashboard/customers');
+}
 export async function createInvoice(formData: FormData) {
   const {customerId, amount, status} = CreateInvoice.parse({
     customerId: formData.get('customerId'),
