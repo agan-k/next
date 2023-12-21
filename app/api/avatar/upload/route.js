@@ -5,12 +5,18 @@ export async function POST(request) {
   const { searchParams } = new URL(request.url);
   const filename = searchParams.get('filename');
  
-  const blob = await put(filename, request, {
+  const blob = await put(filename, request.body, {
     access: 'public',
+    addRandomSuffix: false,
   });
  
   return NextResponse.json(blob);
 }
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 //*** vercel blob put() doesn't seem to support ts? */
 // export async function POST(request: Request): Promise<NextResponse> {
 //   const { searchParams } = new URL(request.url);
