@@ -9,7 +9,6 @@ import { createCustomer } from '@/app/lib/actions';
 export default function Form() {
   const inputFileRef = useRef<HTMLInputElement>(null);
   const [blob, setBlob] = useState<PutBlobResult | null>(null);
-  console.log('blob: ', blob)
 
   async function attachAvatar(event: React.FormEvent<HTMLFormElement>) {
       event.preventDefault();
@@ -19,15 +18,16 @@ export default function Form() {
       }
 
       const file = inputFileRef.current.files[0];
-      console.log('here:', file);
 
-      const response = await fetch(
-        `/api/avatar/upload?filename=${file.name}`,
-        {
-          method: 'POST',
-          body: file,
-        },
-      );
+      const formData = new FormData();
+      formData.set("filename", file.name);
+      formData.set("file", file);
+
+      const response = await fetch('/api/avatar/upload', {
+        method: "POST",
+        body: formData,
+      });
+      
       const newBlob = (await response.json()) as PutBlobResult;
 
       setBlob(newBlob);
